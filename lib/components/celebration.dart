@@ -4,7 +4,8 @@ import 'package:liturgical_calendar/api/liturgical_day.dart';
 class CelebrationWidget extends StatelessWidget {
   final Celebrations celebration;
 
-  const CelebrationWidget({Key key, this.celebration}) : super(key: key);
+  const CelebrationWidget({Key? key, required this.celebration})
+      : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Container(

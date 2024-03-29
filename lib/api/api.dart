@@ -4,9 +4,13 @@ import 'package:liturgical_calendar/api/http_wrapper.dart';
 import 'package:liturgical_calendar/api/liturgical_day.dart';
 
 class API {
-  final todayUrl =
-      "http://calapi.inadiutorium.cz/api/v0/en/calendars/default/today";
-  final base = "http://calapi.inadiutorium.cz/api/v0/";
+  bool useProxy = true;
+  String get todayUrl => useProxy
+      ? 'https://menezesworks.com:8081/liturgy'
+      : "http://calapi.inadiutorium.cz/api/v0/en/calendars/default/today";
+  String get base => useProxy
+      ? "https://menezesworks.com:8081/liturgy/"
+      : "http://calapi.inadiutorium.cz/api/v0/";
   final req = "en/calendars/default/";
 
   Future<LiturgicalDay> getLiturgyToday() async {
@@ -16,8 +20,14 @@ class API {
     return liturgy;
   }
 
+  String _reverseDateString(String s) {
+    return s.split('/').reversed.join('/');
+  }
+
   Future<LiturgicalDay> getLiturgyFor(String dateString) async {
-    final argumentStr = '$base$req$dateString';
+    final argumentStr = useProxy
+        ? '$base${_reverseDateString(dateString)}' //proxy uses reversed format;
+        : '$base$req$dateString';
     final jsonString = await HTTP.getJsonString(argumentStr);
     final jsonObj = json.decode(jsonString);
     final liturgy = LiturgicalDay.fromJson(jsonObj);
@@ -25,9 +35,11 @@ class API {
   }
 
   Future<List<LiturgicalDay>> getLiturgyForMonth(DateTime month) async {
-    final dateString = "${month.year}/${month.month}";
-    final argumentStr = '$base$req$dateString';
+    final dateString = "${month.year}/${month.month}/";
+    final argumentStr = useProxy ? '$base$dateString' : '$base$req$dateString';
+    //print(argumentStr);
     final jsonString = await HTTP.getJsonString(argumentStr);
+    //print(jsonString);
     final jsonObj = json.decode(jsonString);
     List<LiturgicalDay> litMonth;
     litMonth = [];
